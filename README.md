@@ -73,10 +73,8 @@ Exemplo:
 
 ### 3. O que esperamos:
 
-- Seu projeto deve ser **multi-plataforma**.
-- Crie uma documentação e explique como como rodar localmente e também como realizar o deploy.
-- Quanto mais simples for para realizar o deploy, melhor!
-- O teste deverá ser feito utilizando Node. Sinta-se a vontade para usar Express ou Nest.
+- Crie uma documentação e explique como como rodar localmente.
+- O teste deverá ser feito utilizando Node ou Golang. Sinta-se a vontade para usar qualquer framework ou tecnologia em ambas linguagens.
 
 ## O que iremos avaliar
 
