@@ -85,4 +85,6 @@ Nosso time irá avaliar:
 - **Manutenabilidade**
 - **Separação de responsabilidades**
 
+Fique a vontade para usar Over Engineering, aplique DDD, Clean arch, mensageria, cache, TUDO QUE VOCÊ QUISER!!!
+
 Seu código diz muito sobre você, então relaxa, o que queremos é te conhecer melhor através de seu código :wink:.
