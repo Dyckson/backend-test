@@ -3,6 +3,7 @@ package controller
 import (
 	"backend-test/internal/domain"
 	"backend-test/internal/service"
+	"encoding/json"
 	"log"
 	"net/http"
 	"strings"
@@ -49,16 +50,53 @@ func (bc *BeerController) ListAllBeerStyles(c *gin.Context) {
 }
 
 func (bc *BeerController) CreateBeerStyle(c *gin.Context) {
-	var inputStyle domain.BeerStyle
-	if err := c.ShouldBindJSON(&inputStyle); err != nil {
-		log.Printf("controller=BeerController func=CreateBeerStyle name=%s err=%v", inputStyle.Name, err)
+	// Primeiro, vamos verificar se os campos obrigatórios estão presentes no JSON
+	var rawData map[string]interface{}
+	body, err := c.GetRawData()
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid request body, name, temp_min and temp_max are required",
+			"message": "cannot read request body",
 		})
 		return
 	}
 
-	// Valida se o nome é único
+	if err := json.Unmarshal(body, &rawData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid JSON format",
+		})
+		return
+	}
+
+	if _, exists := rawData["name"]; !exists {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "name is required",
+		})
+		return
+	}
+
+	if _, exists := rawData["temp_min"]; !exists {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "temp_min is required",
+		})
+		return
+	}
+
+	if _, exists := rawData["temp_max"]; !exists {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "temp_max is required",
+		})
+		return
+	}
+
+	var inputStyle domain.BeerStyle
+	if err := json.Unmarshal(body, &inputStyle); err != nil {
+		log.Printf("controller=BeerController func=CreateBeerStyle name=%s err=%v", inputStyle.Name, err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid field types",
+		})
+		return
+	}
+
 	if err := bc.ValidationService.ValidateUniqueNameForCreate(inputStyle.Name); err != nil {
 		log.Printf("controller=BeerController func=CreateBeerStyle name=%s err=%v", inputStyle.Name, err)
 
@@ -75,7 +113,6 @@ func (bc *BeerController) CreateBeerStyle(c *gin.Context) {
 		return
 	}
 
-	// Valida a faixa de temperatura
 	if err := bc.ValidationService.ValidateTemperatureRange(inputStyle); err != nil {
 		log.Printf("controller=BeerController func=CreateBeerStyle name=%s err=%v", inputStyle.Name, err)
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -116,12 +153,6 @@ func (bc *BeerController) UpdateBeerStyle(c *gin.Context) {
 		return
 	}
 
-	previewBeerStyle := domain.BeerStyle{
-		Name:    updateRequest.Name,
-		TempMin: updateRequest.TempMin,
-		TempMax: updateRequest.TempMax,
-	}
-
 	currentBeerStyle, err := bc.BeerService.GetBeerStyleByUUID(beerUUID)
 	if err != nil {
 		log.Printf("controller=BeerController func=UpdateBeerStyle beerUUID=%s err=%v", beerUUID, err)
@@ -139,8 +170,8 @@ func (bc *BeerController) UpdateBeerStyle(c *gin.Context) {
 		return
 	}
 
-	if previewBeerStyle.Name != "" && previewBeerStyle.Name != currentBeerStyle.Name {
-		if err := bc.ValidationService.ValidateUniqueNameForUpdate(previewBeerStyle.Name, currentBeerStyle.UUID); err != nil {
+	if updateRequest.Name != nil && *updateRequest.Name != "" && *updateRequest.Name != currentBeerStyle.Name {
+		if err := bc.ValidationService.ValidateUniqueNameForUpdate(*updateRequest.Name, currentBeerStyle.UUID); err != nil {
 			log.Printf("controller=BeerController func=UpdateBeerStyle beerUUID=%s err=%v", beerUUID, err)
 
 			if strings.Contains(err.Error(), "already exists") {
@@ -157,9 +188,8 @@ func (bc *BeerController) UpdateBeerStyle(c *gin.Context) {
 		}
 	}
 
-	// Aplica as mudanças usando o UpdateService
 	originalStyle := currentBeerStyle // Cópia para comparação
-	changed := bc.UpdateService.ApplyBeerStyleUpdates(&currentBeerStyle, previewBeerStyle)
+	changed := bc.UpdateService.ApplyBeerStyleUpdates(&currentBeerStyle, updateRequest)
 
 	if changed {
 		// Valida a faixa de temperatura após as mudanças
@@ -172,7 +202,7 @@ func (bc *BeerController) UpdateBeerStyle(c *gin.Context) {
 		}
 
 		// Log dos campos alterados para auditoria
-		changedFields := bc.UpdateService.GetChangedFields(originalStyle, previewBeerStyle)
+		changedFields := bc.UpdateService.GetChangedFields(originalStyle, updateRequest)
 		log.Printf("controller=BeerController func=UpdateBeerStyle beerUUID=%s changed_fields=%v", beerUUID, changedFields)
 	}
 

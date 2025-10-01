@@ -32,12 +32,25 @@ func (vs *ValidationService) IsNoRowsError(err error) bool {
 	return vs.isNoRowsError(err)
 }
 
-// ValidateTemperatureRange valida se TempMin < TempMax
+// ValidateTemperatureRange valida se TempMin < TempMax e se estão em faixas razoáveis
 func (vs *ValidationService) ValidateTemperatureRange(beerStyle domain.BeerStyle) error {
+	// Valida limites baseados nas temperaturas extremas da Terra
+	// Menor: -89,2°C (Antártida) | Maior: +56,7°C (Vale da Morte)
+	// Usando range ampliado para segurança: -90°C a +60°C
+	if beerStyle.TempMin < -90 || beerStyle.TempMin > 60 {
+		return fmt.Errorf("minimum temperature (%.1f) must be between -90°C and 60°C", beerStyle.TempMin)
+	}
+
+	if beerStyle.TempMax < -90 || beerStyle.TempMax > 60 {
+		return fmt.Errorf("maximum temperature (%.1f) must be between -90°C and 60°C", beerStyle.TempMax)
+	}
+
+	// Valida se TempMin < TempMax
 	if beerStyle.TempMin >= beerStyle.TempMax {
 		return fmt.Errorf("minimum temperature (%.1f) must be less than maximum temperature (%.1f)",
 			beerStyle.TempMin, beerStyle.TempMax)
 	}
+
 	return nil
 }
 
