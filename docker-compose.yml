@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: beer_db
+    environment:
+      POSTGRES_USER: beeruser
+      POSTGRES_PASSWORD: beerpass
+      POSTGRES_DB: beerdb
+    ports:
+      - "55432:5432"
+    volumes:
+      - beer_data:/var/lib/postgresql/data
+      - ./internal/storage/database/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - beer-net
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: beer_api
+    environment:
+      DATABASE_URL: postgres://beeruser:beerpass@db:5432/beerdb?sslmode=disable
+    ports:
+      - "1112:1111"
+    depends_on:
+      - db
+    networks:
+      - beer-net
+
+volumes:
+  beer_data:
+
+networks:
+  beer-net:
+    driver: bridge
