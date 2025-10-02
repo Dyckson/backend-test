@@ -11,16 +11,15 @@ import (
 )
 
 type ValidationService struct {
-	beerService BeerService
+	beerService BeerServiceInterface
 }
 
-func NewValidationService(beerService BeerService) *ValidationService {
+func NewValidationService(beerService BeerServiceInterface) *ValidationService {
 	return &ValidationService{
 		beerService: beerService,
 	}
 }
 
-// isNoRowsError verifica se o erro indica que não há linhas no resultado
 func (vs *ValidationService) isNoRowsError(err error) bool {
 	if err == nil {
 		return false
@@ -29,16 +28,11 @@ func (vs *ValidationService) isNoRowsError(err error) bool {
 	return errors.Is(err, sql.ErrNoRows) || strings.Contains(err.Error(), "no rows in result set")
 }
 
-// IsNoRowsError método público para verificar se é erro "no rows"
 func (vs *ValidationService) IsNoRowsError(err error) bool {
 	return vs.isNoRowsError(err)
 }
 
-// ValidateTemperatureRange valida se TempMin < TempMax e se estão em faixas razoáveis
 func (vs *ValidationService) ValidateTemperatureRange(beerStyle domain.BeerStyle) error {
-	// Valida limites baseados nas temperaturas extremas da Terra
-	// Menor: -89,2°C (Antártida) | Maior: +56,7°C (Vale da Morte)
-	// Usando range ampliado para segurança: -90°C a +60°C
 	if beerStyle.TempMin < -90 || beerStyle.TempMin > 60 {
 		return fmt.Errorf("minimum temperature (%.1f) must be between -90°C and 60°C", beerStyle.TempMin)
 	}
@@ -47,7 +41,6 @@ func (vs *ValidationService) ValidateTemperatureRange(beerStyle domain.BeerStyle
 		return fmt.Errorf("maximum temperature (%.1f) must be between -90°C and 60°C", beerStyle.TempMax)
 	}
 
-	// Valida se TempMin < TempMax
 	if beerStyle.TempMin >= beerStyle.TempMax {
 		return fmt.Errorf("minimum temperature (%.1f) must be less than maximum temperature (%.1f)",
 			beerStyle.TempMin, beerStyle.TempMax)
@@ -56,12 +49,7 @@ func (vs *ValidationService) ValidateTemperatureRange(beerStyle domain.BeerStyle
 	return nil
 }
 
-// ValidateTemperatureInput valida se a temperatura de entrada está dentro dos limites aceitáveis
-// Esta validação é usada para entrada de temperatura nas APIs de recomendação
 func (vs *ValidationService) ValidateTemperatureInput(temperature float64) error {
-	// Valida limites baseados nas temperaturas extremas da Terra
-	// Menor: -89,2°C (Antártida) | Maior: +56,7°C (Vale da Morte)
-	// Usando range ampliado para segurança: -90°C a +60°C
 	if temperature < -90 || temperature > 60 {
 		return fmt.Errorf("temperature (%.1f) must be between -90°C and 60°C", temperature)
 	}
@@ -69,14 +57,12 @@ func (vs *ValidationService) ValidateTemperatureInput(temperature float64) error
 	return nil
 }
 
-// ValidateUniqueNameForCreate valida se o nome da cerveja é único para criação
 func (vs *ValidationService) ValidateUniqueNameForCreate(name string) error {
 	beerStyles, err := vs.beerService.ListAllBeerStyles()
 	if err != nil {
 		if !vs.isNoRowsError(err) {
 			return fmt.Errorf("failed to check beer styles: %w", err)
 		}
-		// Se não há estilos, o nome é único
 		return nil
 	}
 
@@ -89,10 +75,9 @@ func (vs *ValidationService) ValidateUniqueNameForCreate(name string) error {
 	return nil
 }
 
-// ValidateUniqueNameForUpdate valida se o nome da cerveja é único para atualização
 func (vs *ValidationService) ValidateUniqueNameForUpdate(name string, excludeUUID string) error {
 	if name == "" {
-		return nil // Nome vazio não precisa validar
+		return nil
 	}
 
 	beerStyles, err := vs.beerService.ListAllBeerStyles()
@@ -100,7 +85,6 @@ func (vs *ValidationService) ValidateUniqueNameForUpdate(name string, excludeUUI
 		if !vs.isNoRowsError(err) {
 			return fmt.Errorf("failed to check beer styles: %w", err)
 		}
-		// Se não há estilos, o nome é único
 		return nil
 	}
 
@@ -113,7 +97,6 @@ func (vs *ValidationService) ValidateUniqueNameForUpdate(name string, excludeUUI
 	return nil
 }
 
-// ValidateUUID valida se a string fornecida é um UUID válido
 func (vs *ValidationService) ValidateUUID(uuidStr string) error {
 	if uuidStr == "" {
 		return fmt.Errorf("UUID cannot be empty")

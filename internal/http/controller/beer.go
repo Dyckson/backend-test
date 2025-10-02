@@ -12,12 +12,12 @@ import (
 )
 
 type BeerController struct {
-	BeerService       *service.BeerService
-	ValidationService *service.ValidationService
-	UpdateService     *service.UpdateService
+	BeerService       service.BeerServiceInterface
+	ValidationService service.ValidationServiceInterface
+	UpdateService     service.UpdateServiceInterface
 }
 
-func NewBeerController(beerService *service.BeerService, validationService *service.ValidationService, updateService *service.UpdateService) *BeerController {
+func NewBeerController(beerService service.BeerServiceInterface, validationService service.ValidationServiceInterface, updateService service.UpdateServiceInterface) *BeerController {
 	return &BeerController{
 		BeerService:       beerService,
 		ValidationService: validationService,
@@ -50,7 +50,6 @@ func (bc *BeerController) ListAllBeerStyles(c *gin.Context) {
 }
 
 func (bc *BeerController) CreateBeerStyle(c *gin.Context) {
-	// Primeiro, vamos verificar se os campos obrigatórios estão presentes no JSON
 	var rawData map[string]interface{}
 	body, err := c.GetRawData()
 	if err != nil {
@@ -191,7 +190,6 @@ func (bc *BeerController) UpdateBeerStyle(c *gin.Context) {
 	changed := bc.UpdateService.ApplyBeerStyleUpdates(&currentBeerStyle, updateRequest)
 
 	if changed {
-		// Valida a faixa de temperatura após as mudanças
 		if err := bc.ValidationService.ValidateTemperatureRange(currentBeerStyle); err != nil {
 			log.Printf("controller=BeerController func=UpdateBeerStyle beerUUID=%s err=%v", beerUUID, err)
 			c.JSON(http.StatusBadRequest, gin.H{

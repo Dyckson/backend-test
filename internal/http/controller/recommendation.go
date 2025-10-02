@@ -11,11 +11,11 @@ import (
 )
 
 type RecommendationController struct {
-	RecommendationService *service.RecommendationService
-	ValidationService     *service.ValidationService
+	RecommendationService service.RecommendationServiceInterface
+	ValidationService     service.ValidationServiceInterface
 }
 
-func NewRecommendationController(recommendationService *service.RecommendationService, validationService *service.ValidationService) *RecommendationController {
+func NewRecommendationController(recommendationService service.RecommendationServiceInterface, validationService service.ValidationServiceInterface) *RecommendationController {
 	return &RecommendationController{
 		RecommendationService: recommendationService,
 		ValidationService:     validationService,
@@ -32,7 +32,6 @@ func (rc *RecommendationController) SuggestSpotifyPlaylist(c *gin.Context) {
 		return
 	}
 
-	// Validação de range de temperatura
 	if err := rc.ValidationService.ValidateTemperatureInput(request.Temperature); err != nil {
 		log.Printf("controller=RecommendationController func=SuggestSpotifyPlaylist temperature=%.1f err=%v", request.Temperature, err)
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -45,7 +44,6 @@ func (rc *RecommendationController) SuggestSpotifyPlaylist(c *gin.Context) {
 	if err != nil {
 		log.Printf("controller=RecommendationController func=SuggestSpotifyPlaylist temperature=%.1f err=%v", request.Temperature, err)
 
-		// Determina o status HTTP baseado no tipo de erro
 		var status int
 		var message string
 

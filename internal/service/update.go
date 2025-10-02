@@ -31,7 +31,6 @@ func (us *UpdateService) ApplyBeerStyleUpdates(current *domain.BeerStyle, update
 	return changed
 }
 
-// GetChangedFields retorna os campos que foram alterados (para logs detalhados)
 func (us *UpdateService) GetChangedFields(original domain.BeerStyle, updates domain.BeerStyleUpdateRequest) []string {
 	var changedFields []string
 

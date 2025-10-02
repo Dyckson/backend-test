@@ -15,13 +15,11 @@ var beerController *controller.BeerController
 var recommendationController *controller.RecommendationController
 
 func init() {
-	// Inicializa as dependências
-	beerRepo := repository.BeerRepository{}
+	beerRepo := &repository.BeerRepository{}
 	beerService := service.NewBeerService(beerRepo)
-	validationService := service.NewValidationService(*beerService)
+	validationService := service.NewValidationService(beerService)
 	updateService := service.NewUpdateService()
 
-	// Inicializa Spotify Service
 	clientID := os.Getenv("SPOTIFY_CLIENT_ID")
 	clientSecret := os.Getenv("SPOTIFY_CLIENT_SECRET")
 
@@ -38,9 +36,8 @@ func init() {
 		}
 	}
 
-	recommendationService := service.NewRecommendationService(*beerService, spotifyService)
+	recommendationService := service.NewRecommendationService(beerService, spotifyService)
 
-	// Inicializa controllers - usando APENAS ponteiros para consistência
 	beerController = controller.NewBeerController(beerService, validationService, updateService)
 	recommendationController = controller.NewRecommendationController(recommendationService, validationService)
 }

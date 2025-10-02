@@ -6,10 +6,10 @@ import (
 )
 
 type BeerService struct {
-	beerRepository repository.BeerRepository
+	beerRepository repository.BeerRepositoryInterface
 }
 
-func NewBeerService(beerRepo repository.BeerRepository) *BeerService {
+func NewBeerService(beerRepo repository.BeerRepositoryInterface) *BeerService {
 	return &BeerService{
 		beerRepository: beerRepo,
 	}

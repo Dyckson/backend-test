@@ -15,7 +15,6 @@ var (
 	once sync.Once
 )
 
-// GetDB retorna uma instância singleton da conexão com o banco
 func GetDB() *ksql.DB {
 	once.Do(func() {
 		dbConnect, err := kpgx.New(context.Background(), config.DATABASE_URL, ksql.Config{})
@@ -28,7 +27,6 @@ func GetDB() *ksql.DB {
 	return db
 }
 
-// CloseDB fecha a conexão com o banco (usar apenas no shutdown da aplicação)
 func CloseDB() error {
 	if db != nil {
 		return db.Close()
