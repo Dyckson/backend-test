@@ -12,12 +12,12 @@ import (
 )
 
 type BeerController struct {
-	BeerService       service.BeerService
-	ValidationService service.ValidationService
-	UpdateService     service.UpdateService
+	BeerService       *service.BeerService
+	ValidationService *service.ValidationService
+	UpdateService     *service.UpdateService
 }
 
-func NewBeerController(beerService service.BeerService, validationService service.ValidationService, updateService service.UpdateService) *BeerController {
+func NewBeerController(beerService *service.BeerService, validationService *service.ValidationService, updateService *service.UpdateService) *BeerController {
 	return &BeerController{
 		BeerService:       beerService,
 		ValidationService: validationService,

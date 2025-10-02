@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 type ValidationService struct {
@@ -106,6 +108,20 @@ func (vs *ValidationService) ValidateUniqueNameForUpdate(name string, excludeUUI
 		if style.Name == name && style.UUID != excludeUUID {
 			return fmt.Errorf("beer style with name '%s' already exists", name)
 		}
+	}
+
+	return nil
+}
+
+// ValidateUUID valida se a string fornecida é um UUID válido
+func (vs *ValidationService) ValidateUUID(uuidStr string) error {
+	if uuidStr == "" {
+		return fmt.Errorf("UUID cannot be empty")
+	}
+
+	_, err := uuid.Parse(uuidStr)
+	if err != nil {
+		return fmt.Errorf("invalid UUID format: %s", uuidStr)
 	}
 
 	return nil

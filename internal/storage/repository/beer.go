@@ -4,14 +4,16 @@ import (
 	"backend-test/internal/domain"
 	postgres "backend-test/internal/storage/database"
 	"context"
+	"time"
 )
 
 type BeerRepository struct{}
 
 func (u BeerRepository) ListAllBeerStyles() ([]domain.BeerStyle, error) {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	db := postgres.GetDB()
-	defer db.Close()
 
 	var beerStyles []domain.BeerStyle
 	err := db.Query(ctx, &beerStyles, u.getAllBeerStylesQuery())
@@ -23,9 +25,10 @@ func (u BeerRepository) ListAllBeerStyles() ([]domain.BeerStyle, error) {
 }
 
 func (u BeerRepository) CreateBeerStyle(beerStyle domain.BeerStyle) (domain.BeerStyle, error) {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	db := postgres.GetDB()
-	defer db.Close()
 
 	var createdBeerStyle domain.BeerStyle
 	err := db.QueryOne(ctx, &createdBeerStyle, u.createBeerStyleQuery(), beerStyle.Name, beerStyle.TempMin, beerStyle.TempMax)
@@ -37,9 +40,10 @@ func (u BeerRepository) CreateBeerStyle(beerStyle domain.BeerStyle) (domain.Beer
 }
 
 func (u BeerRepository) GetBeerStyleByUUID(beerUUID string) (domain.BeerStyle, error) {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	db := postgres.GetDB()
-	defer db.Close()
 
 	var beerStyle domain.BeerStyle
 	err := db.QueryOne(ctx, &beerStyle, u.getBeerStyleByUUIDQuery(), beerUUID)
@@ -51,9 +55,10 @@ func (u BeerRepository) GetBeerStyleByUUID(beerUUID string) (domain.BeerStyle, e
 }
 
 func (u BeerRepository) UpdateBeerStyle(beerStyle domain.BeerStyle) (domain.BeerStyle, error) {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	db := postgres.GetDB()
-	defer db.Close()
 
 	var updatedBeerStyle domain.BeerStyle
 	err := db.QueryOne(ctx, &updatedBeerStyle, u.updateBeerStyleQuery(),
@@ -66,9 +71,10 @@ func (u BeerRepository) UpdateBeerStyle(beerStyle domain.BeerStyle) (domain.Beer
 }
 
 func (u BeerRepository) DeleteBeerStyle(beerUUID string) error {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	db := postgres.GetDB()
-	defer db.Close()
 
 	_, err := db.Exec(ctx, u.deleteBeerStyleQuery(), beerUUID)
 	if err != nil {

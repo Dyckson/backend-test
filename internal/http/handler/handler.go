@@ -25,22 +25,23 @@ func init() {
 	clientID := os.Getenv("SPOTIFY_CLIENT_ID")
 	clientSecret := os.Getenv("SPOTIFY_CLIENT_SECRET")
 
+	var spotifyService *spotify.SpotifyService
 	if clientID == "" || clientSecret == "" {
-		log.Println("Warning: Spotify credentials not set. Using placeholder.")
-		clientID = "your_client_id"
-		clientSecret = "your_client_secret"
-	}
-
-	spotifyService, err := spotify.NewSpotifyService(clientID, clientSecret)
-	if err != nil {
-		log.Printf("Warning: Failed to initialize Spotify service: %v", err)
+		log.Println("Warning: Spotify credentials not set. Spotify integration will be disabled.")
 		spotifyService = nil
+	} else {
+		var err error
+		spotifyService, err = spotify.NewSpotifyService(clientID, clientSecret)
+		if err != nil {
+			log.Printf("Warning: Failed to initialize Spotify service: %v", err)
+			spotifyService = nil
+		}
 	}
 
 	recommendationService := service.NewRecommendationService(*beerService, spotifyService)
 
-	// Inicializa controllers
-	beerController = controller.NewBeerController(*beerService, *validationService, *updateService)
+	// Inicializa controllers - usando APENAS ponteiros para consistência
+	beerController = controller.NewBeerController(beerService, validationService, updateService)
 	recommendationController = controller.NewRecommendationController(recommendationService, validationService)
 }
 
