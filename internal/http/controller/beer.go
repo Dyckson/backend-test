@@ -188,7 +188,6 @@ func (bc *BeerController) UpdateBeerStyle(c *gin.Context) {
 		}
 	}
 
-	originalStyle := currentBeerStyle // Cópia para comparação
 	changed := bc.UpdateService.ApplyBeerStyleUpdates(&currentBeerStyle, updateRequest)
 
 	if changed {
@@ -200,10 +199,6 @@ func (bc *BeerController) UpdateBeerStyle(c *gin.Context) {
 			})
 			return
 		}
-
-		// Log dos campos alterados para auditoria
-		changedFields := bc.UpdateService.GetChangedFields(originalStyle, updateRequest)
-		log.Printf("controller=BeerController func=UpdateBeerStyle beerUUID=%s changed_fields=%v", beerUUID, changedFields)
 	}
 
 	if !changed {

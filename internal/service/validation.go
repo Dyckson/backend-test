@@ -54,6 +54,19 @@ func (vs *ValidationService) ValidateTemperatureRange(beerStyle domain.BeerStyle
 	return nil
 }
 
+// ValidateTemperatureInput valida se a temperatura de entrada está dentro dos limites aceitáveis
+// Esta validação é usada para entrada de temperatura nas APIs de recomendação
+func (vs *ValidationService) ValidateTemperatureInput(temperature float64) error {
+	// Valida limites baseados nas temperaturas extremas da Terra
+	// Menor: -89,2°C (Antártida) | Maior: +56,7°C (Vale da Morte)
+	// Usando range ampliado para segurança: -90°C a +60°C
+	if temperature < -90 || temperature > 60 {
+		return fmt.Errorf("temperature (%.1f) must be between -90°C and 60°C", temperature)
+	}
+
+	return nil
+}
+
 // ValidateUniqueNameForCreate valida se o nome da cerveja é único para criação
 func (vs *ValidationService) ValidateUniqueNameForCreate(name string) error {
 	beerStyles, err := vs.beerService.ListAllBeerStyles()
