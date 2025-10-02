@@ -1,12 +1,10 @@
 package handler
 
 import (
-	"backend-test/external/spotify"
+	config "backend-test/internal/cmd/server"
 	"backend-test/internal/http/controller"
 	"backend-test/internal/service"
 	"backend-test/internal/storage/repository"
-	"log"
-	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,21 +18,7 @@ func init() {
 	validationService := service.NewValidationService(beerService)
 	updateService := service.NewUpdateService()
 
-	clientID := os.Getenv("SPOTIFY_CLIENT_ID")
-	clientSecret := os.Getenv("SPOTIFY_CLIENT_SECRET")
-
-	var spotifyService *spotify.SpotifyService
-	if clientID == "" || clientSecret == "" {
-		log.Println("Warning: Spotify credentials not set. Spotify integration will be disabled.")
-		spotifyService = nil
-	} else {
-		var err error
-		spotifyService, err = spotify.NewSpotifyService(clientID, clientSecret)
-		if err != nil {
-			log.Printf("Warning: Failed to initialize Spotify service: %v", err)
-			spotifyService = nil
-		}
-	}
+	spotifyService := config.InitializeSpotifyService()
 
 	recommendationService := service.NewRecommendationService(beerService, spotifyService)
 
