@@ -2,14 +2,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Go App",
+            "name": "Launch Package",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}",
+            "program": ".",
+            "console": "integratedTerminal",
             "env": {
-                "DATABASE_URL": "postgres://beeruser:beerpass@localhost:55432/beerdb?sslmode=disable"
-            }
+                "DATABASE_URL": "postgres://beeruser:beerpass@localhost:55432/beerdb?sslmode=disable",
+                "SPOTIFY_CLIENT_ID": "80e0a65a3d914670bce662856941d04e",
+                "SPOTIFY_CLIENT_SECRET": "79bdf821f47c40b0ad02567f3728419f"
+            },
+            "showLog": false
         }
     ]
 }
